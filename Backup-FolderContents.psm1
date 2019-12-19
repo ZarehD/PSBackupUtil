@@ -85,7 +85,7 @@ function Backup-FolderContents {
             $base = Split-Path $src -Leaf
         }    
 
-        $Mode = Get-NextBackupMode $base $dst $FullBackupInterval
+        $Mode = Get-NextBackupMode $base $dst $FullBackupInterval $Extension
 
         $type = if ($Mode -eq ([ArchiveMode]::Unknown)) { $null } else { "$Mode " }
         Write-Host "Performing $($type)Backup for $base" #-ForegroundColor Green
@@ -162,10 +162,10 @@ function New-Backup {
         }
     }
 
-    Write-Verbose "File Count: $($Files.Length)"
     # $Files | Select-Object -Property FullName
-
+    
     if ($Files.Length -gt 0) {
+        Write-Verbose "Archive will contain $($Files.Length) files"
         New-Archive $SourceFolder $DestinationFolder $ArchiveName $Files
     }
     else {
@@ -294,11 +294,11 @@ function Get-NextBackupMode {
         # The base name for the archived files.
         [parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string] $ArchiveBasename,
+        [string] $Basename,
 
         # Folder in which backups are stored.
         [parameter(Mandatory)]
-        [string] $BackupFolder,
+        [string] $BackupsFolder,
 
         # Number of days between full backups.
         [parameter(Mandatory)]
@@ -309,47 +309,45 @@ function Get-NextBackupMode {
         $Extension = "zip"
     )
 
-    if (-not $(Test-Path $BackupFolder)) {
+    if (-not $(Test-Path $BackupsFolder)) {
         return [ArchiveMode]::Full
     }
 
-    $DtLastFullBackup = Get-DateMostRecentArchive $BackupFolder $ArchiveBasename ([ArchiveMode]::Full) -Extension $Extension
+    $DtLastFullBackup = Get-DateMostRecentArchive $BackupsFolder $Basename ([ArchiveMode]::Full) $Extension
 
     if ($null -eq $DtLastFullBackup) {
         return [ArchiveMode]::Full
     }
 
-    if ($DtLastFullBackup.Day -ge $DaysBetweenFullBackups) {
+    $NumDaysSince = [datetime]::Now.Day - $DtLastFullBackup.Day
+    if ($NumDaysSince -ge $DaysBetweenFullBackups) {
         return [ArchiveMode]::Full
     }
     else {
         return [ArchiveMode]::Partial
     }
-
-    # If num days since last full backup GTE NumDaysToFullBackup => Full-Backup
-    # Else => ChangesOnly
 }
 
 function Get-DateMostRecentArchive {
     param (
-        # The folder in which to look for archived files.
+        # Folder where backup files are stored.
         [parameter(Mandatory)]
         [ValidateScript( { Test-Path $_ } )]
         [ValidateNotNullOrEmpty()]
         [string]
-        $Location,
+        $BackupsFolder,
 
-        # The base name of the archive file.
+        # Base name of archive file.
         [parameter(Mandatory)]
         [string]
         $BaseName,
 
-        # The archive type to look for: Full or Partial?
+        # Archive type to look for: Full or Partial?
         [parameter(Mandatory)]
         [ArchiveMode]
         $ArchiveType,
 
-        # The archive file extension (defaults to 'zip').
+        # Archive file name extension (defaults to 'zip').
         [parameter()]
         [string]
         $Extension = "zip"
@@ -359,11 +357,10 @@ function Get-DateMostRecentArchive {
     $Cwd = Get-Location
     [Directory]::SetCurrentDirectory($Cwd)
     try {
-
         $Marker = Get-ArchiveModeMarker $ArchiveType
         if (-not [string]::IsNullOrWhiteSpace($Marker)) { $Marker = "-$Marker" }
 
-        $Path = [Path]::Combine($Location, "$($BaseName)$($Marker)*.$($Extension)")
+        $Path = Join-Path -Path $BackupsFolder -ChildPath "$($BaseName)$($Marker)*.$($Extension)"
         $Path = [Path]::GetFullPath($Path)
 
         if (0 -ge (Get-ChildItem $Path | Measure-Object).Count) {
