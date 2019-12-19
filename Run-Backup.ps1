@@ -1,11 +1,19 @@
-
 Import-Module .\BackupUtil.psd1 -Force
+# Requires -Module BackupUtil
 
-$Module = "SampleDataModel" # "Libs.Runtime"
+$mod = "SampleDataModel" # "Libs.Runtime"
+$src = "C:\Dev\Projects\ExpressAPI\Modules\$mod"
+$dst = "E:\Projects.Archive\ExpressAPI\$mod"
+
+$igFolders = @("obj", "bin", "packages", "node_modules", ".git", ".vs", "backups", "MexUploads", "SharedLibs")
+$igTypes = @("*.zip", "*.user", "*.msi")
+$igFiles = @()
+
 Backup-FolderContents `
-    "C:\Dev\Projects\ExpressAPI\Modules\$Module" `
-    "E:\Projects.Archive\ExpressAPI\$Module" `
+    -SourceFolder $src `
+    -DestinationFolder $dst `
     -FullBackupInterval 10 `
-    -IgnoreFolders @("obj", "bin", "packages", "node_modules", ".vscode", "backups", "MexUploads", "SharedLibs") `
-    -IgnoreFileTypes @("*.zip", "*.user", "*.msi") `
+    -IgnoreFolders $igFolders `
+    -IgnoreFileTypes $igTypes `
+    -IgnoreFiles $igFiles `
     -Verbose -Debug
