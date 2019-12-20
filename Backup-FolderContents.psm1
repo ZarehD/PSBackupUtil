@@ -96,7 +96,7 @@ function Backup-FolderContents {
             -IgnoreFileTypes $IgnoreFileTypes `
             -IgnoreFiles $IgnoreFiles
 
-        Write-Host "Operation completed in $($sw.Elapsed.TotalSeconds) seconds for $base" #-ForegroundColor Green
+        Write-Host "Operation completed in $($sw.Elapsed.TotalSeconds) seconds for $base ($SourceFolder)" #-ForegroundColor Green
     }
     catch {
         throw
@@ -139,32 +139,39 @@ function New-Backup {
 
     $ArchiveName = New-ArchiveName $Basename $ArchiveMode $Extension
     $ArchiveName = join-path -Path $DestinationFolder -ChildPath $ArchiveName
-    Write-Debug "ArchiveName: $ArchiveName"
+    Write-Debug "New-Backup: ArchiveName = $ArchiveName"
 
     $Files = @()
+    [datetime] $DtChangedAfter = [datetime]::MinValue
+
+    $DtLastFull = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Full) $Extension
 
     switch ($ArchiveMode) {
         { $_ -in [ArchiveMode]::Full, [ArchiveMode]::Unknown } { 
-            $Files = Get-FilesForFullBackup `
-                $SourceFolder `
-                -IgnoreFolders $IgnoreFolders `
-                -IgnoreFileTypes $IgnoreFileTypes `
-                -IgnoreFiles $IgnoreFiles
+            if ($null -ne $DtLastFull) {
+                $DtChangedAfter = $DtLastFull 
+            }
         }
         ([ArchiveMode]::Partial) {
-            [datetime] $DtLastFull = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Full) $Extension
-            [datetime] $DtLastPartial = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Partial) $Extension
-            [datetime] $DtChangedAfter = if ($null -ne $DtLastPartial) { $DtLastPartial } else { $DtLastFull }
-
-            $Files = Get-ChangedFilesForBackup `
-                $SourceFolder `
-                $DtChangedAfter `
-                -IgnoreFolders $IgnoreFolders `
-                -IgnoreFileTypes $IgnoreFileTypes `
-                -IgnoreFiles $IgnoreFiles
+            $DtLastPartial = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Partial) $Extension
+            if ($null -ne $DtLastPartial) {
+                $DtChangedAfter = $DtLastPartial 
+            }
+            elseif ($null -ne $DtLastFull) {
+                $DtChangedAfter = $DtLastFull 
+            }
         }
         Default { }
     }
+
+    Write-Debug "New-Backup: DtChangedAfter = $DtChangedAfter"
+
+    $Files = Get-FilesForFullBackup `
+        $SourceFolder `
+        $DtChangedAfter `
+        -IgnoreFolders $IgnoreFolders `
+        -IgnoreFileTypes $IgnoreFileTypes `
+        -IgnoreFiles $IgnoreFiles
 
     # $Files | Select-Object -Property FullName
 
@@ -185,40 +192,7 @@ function Get-FilesForFullBackup {
         [ValidateNotNullOrEmpty()]
         [string] $SourceFolder,
 
-        [string[]] $IgnoreFolders,
-        [string[]] $IgnoreFileTypes,
-        [string[]] $IgnoreFiles
-    )
-
-    $ignore = $IgnoreFiles + $IgnoreFileTypes
-
-    $Files = `
-        Get-ChildItem $SourceFolder -File -Exclude $ignore -Recurse | `
-        Where-Object { 
-        $(
-            !$_.PSIsContainer -or
-            $($_.PSIsContainer -and $_.Name -inotin $IgnoreFolders)
-        ) -and
-        $(
-            foreach ($fig in $IgnoreFolders) { 
-                if ($_ -imatch "\\$fig\\" ) {
-                    return $false
-                }
-            }
-            return $true
-        ) } | `
-        Select-Object | `
-        Sort-Object -Property FullName, Name
-
-    return $Files
-}
-
-function Get-ChangedFilesForBackup {
-    param (
-        [parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string] $SourceFolder,
-
+        # Date/Time after which modified files are to be archived.
         [parameter(Mandatory)]
         [ValidateNotNull()]
         [datetime] $DtChangedAfter,
@@ -409,7 +383,7 @@ function Get-DateMostRecentArchive {
         }
 
         $ArchiveName = Get-ChildItem $Path | Sort-Object -Property FullName | Select-Object -Last 1 | Split-Path -Leaf
-        Write-Debug "Get-DateMostRecentArchive: ArchiveName = $ArchiveName"
+        Write-Debug "Get-DateMostRecentArchive: Last Archive = $ArchiveName"
 
         return Get-DateFromArchiveName $ArchiveName
     }
