@@ -136,7 +136,7 @@ function New-Backup {
         [string[]] $IgnoreFileTypes,
         [string[]] $IgnoreFiles
     )
- 
+
     $ArchiveName = New-ArchiveName $Basename $ArchiveMode $Extension
     $ArchiveName = join-path -Path $DestinationFolder -ChildPath $ArchiveName
     Write-Debug "ArchiveName: $ArchiveName"
@@ -151,19 +151,23 @@ function New-Backup {
                 -IgnoreFileTypes $IgnoreFileTypes `
                 -IgnoreFiles $IgnoreFiles
         }
-        ([ArchiveMode]::Partial) { 
+        ([ArchiveMode]::Partial) {
+            [datetime] $DtLastFull = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Full) $Extension
+            [datetime] $DtLastPartial = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Partial) $Extension
+            [datetime] $DtChangedAfter = if ($null -ne $DtLastPartial) { $DtLastPartial } else { $DtLastFull }
+
+            $Files = Get-ChangedFilesForBackup `
+                $SourceFolder `
+                $DtChangedAfter `
+                -IgnoreFolders $IgnoreFolders `
+                -IgnoreFileTypes $IgnoreFileTypes `
+                -IgnoreFiles $IgnoreFiles
         }
-        Default { 
-            # $Files = Get-FilesForFullBackup `
-            #     $SourceFolder `
-            #     -IgnoreFolders $IgnoreFolders `
-            #     -IgnoreFileTypes $IgnoreFileTypes `
-            #     -IgnoreFiles $IgnoreFiles
-        }
+        Default { }
     }
 
     # $Files | Select-Object -Property FullName
-    
+
     if ($Files.Length -gt 0) {
         Write-Verbose "Archive will contain $($Files.Length) files"
         New-Archive $SourceFolder $DestinationFolder $ArchiveName $Files
@@ -209,6 +213,43 @@ function Get-FilesForFullBackup {
     return $Files
 }
 
+function Get-ChangedFilesForBackup {
+    param (
+        [parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $SourceFolder,
+
+        [parameter(Mandatory)]
+        [ValidateNotNull()]
+        [datetime] $DtChangedAfter,
+
+        [string[]] $IgnoreFolders,
+        [string[]] $IgnoreFileTypes,
+        [string[]] $IgnoreFiles
+    )
+
+    $ignore = $IgnoreFiles + $IgnoreFileTypes
+
+    $Files = `
+        Get-ChildItem $SourceFolder -File -Exclude $ignore -Recurse | `
+        Where-Object { 
+        $(
+            $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter) -or
+            $($_.PSIsContainer -and $_.Name -inotin $IgnoreFolders)
+        ) -and
+        $(
+            foreach ($fig in $IgnoreFolders) { 
+                if ($_ -imatch "\\$fig\\" ) {
+                    return $false
+                }
+            }
+            return $true
+        ) } | `
+        Select-Object | `
+        Sort-Object -Property FullName, Name
+
+    return $Files
+}
 
 function New-Archive {
     param (
