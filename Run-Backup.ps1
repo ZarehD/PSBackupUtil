@@ -5,7 +5,13 @@ $mod = "SampleDataModel" # "Libs.Runtime"
 $src = "C:\Dev\Projects\ExpressAPI\Modules\$mod"
 $dst = "E:\Projects.Archive\ExpressAPI\$mod"
 
-$igFolders = @("obj", "bin", "packages", "node_modules", ".git", ".vs", "backups", "MexUploads", "SharedLibs")
+$igFolders = @(
+    "obj", "bin", 
+    "packages", "node_modules", "wwwroot", 
+    ".git", ".vs", 
+    "backups", "MexUploads", "SharedLibs", 
+    "SqlServerTypes\\x64", "SqlServerTypes\\x86"
+)    
 $igTypes = @("*.zip", "*.user", "*.msi")
 $igFiles = @()
 

@@ -334,7 +334,7 @@ function Get-NextBackupMode {
         return [ArchiveMode]::Full
     }
 
-    $NumDaysSince = [datetime]::Now.Day - $DtLastFullBackup.Day
+    $NumDaysSince = ([timespan] ([datetime]::Now - $DtLastFullBackup)).Days
     if ($NumDaysSince -ge $DaysBetweenFullBackups) {
         return [ArchiveMode]::Full
     }
@@ -346,8 +346,8 @@ function Get-NextBackupMode {
 function Get-DateMostRecentArchive {
     param (
         # Folder where backup files are stored.
+        #[ValidateScript( { Test-Path $_ } )]
         [parameter(Mandatory)]
-        [ValidateScript( { Test-Path $_ } )]
         [ValidateNotNullOrEmpty()]
         [string]
         $BackupsFolder,
@@ -367,6 +367,8 @@ function Get-DateMostRecentArchive {
         [string]
         $Extension = "zip"
     )
+
+    if (-not $(Test-Path $BackupsFolder)) { return $null }
 
     $OldCwd = [Directory]::GetCurrentDirectory()
     $Cwd = Get-Location
