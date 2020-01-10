@@ -216,7 +216,7 @@ function Get-FilesForBackup {
     $ignore = $IgnoreFiles + $IgnoreFileTypes
 
     $Files = `
-        Get-ChildItem $SourceFolder -File -Exclude $ignore -Recurse | `
+        Get-ChildItem $SourceFolder -File -Exclude $ignore -Recurse -Force | `
         Where-Object { 
         $(
             # $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter) -or
