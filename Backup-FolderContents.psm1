@@ -141,61 +141,72 @@ function New-Backup {
     $ArchiveName = join-path -Path $DestinationFolder -ChildPath $ArchiveName
     Write-Debug "New-Backup: ArchiveName = $ArchiveName"
 
-    $Files = @()
-    [datetime] $DtChangedAfter = [datetime]::MinValue
 
-    $DtLastFull = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Full) $Extension
-
-    switch ($ArchiveMode) {
-        { $_ -in [ArchiveMode]::Full, [ArchiveMode]::Unknown } { 
-            if ($null -ne $DtLastFull) {
-                $DtChangedAfter = $DtLastFull 
-            }
-        }
-        ([ArchiveMode]::Partial) {
-            $DtLastPartial = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Partial) $Extension
-            if ($null -ne $DtLastPartial) {
-                $DtChangedAfter = $DtLastPartial 
-            }
-            elseif ($null -ne $DtLastFull) {
-                $DtChangedAfter = $DtLastFull 
-            }
-        }
-        Default { }
-    }
-
-    Write-Debug "New-Backup: DtChangedAfter = $DtChangedAfter"
-
-    $Files = Get-FilesForFullBackup `
+    $Files = Get-FilesForBackup `
         $SourceFolder `
-        $DtChangedAfter `
         -IgnoreFolders $IgnoreFolders `
         -IgnoreFileTypes $IgnoreFileTypes `
         -IgnoreFiles $IgnoreFiles
 
+    if (($null -eq $Files) -or (0 -ge $Files.Length)) {
+        Write-Warning "New-Backup: Source folder contains no files that can be archived."
+        return
+    }
+
     # $Files | Select-Object -Property FullName
 
-    if ($Files.Length -gt 0) {
-        Write-Verbose "Archive will contain $($Files.Length) files"
-        New-Archive $SourceFolder $DestinationFolder $ArchiveName $Files
+
+    $DtLastFull = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Full) $Extension
+    $DtChangedAfter = $DtLastFull
+    if ($null -eq $DtChangedAfter) { 
+        $DtChangedAfter = [datetime]::MinValue
     }
-    else {
-        Write-Host "Nothing to do: No files to archive." -ForegroundColor Yellow
+
+    if ([ArchiveMode]::Partial -eq $ArchiveMode) {
+        $DtLastPartial = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Partial) $Extension
+        if ($null -ne $DtLastPartial) {
+            $DtChangedAfter = $DtLastPartial 
+        }
+
+        $Files = $Files | Where-Object {
+            $_.PSIsContainer -or
+            $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter)
+        }
+
+        if (($null -eq $Files) -or (0 -ge $Files.Length)) {
+            Write-Host "New-Backup: Nothing to do. No files changed since last backup." -ForegroundColor Yellow
+            return
+        }
     }
+
+    Write-Debug "New-Backup: DtChangedAfter = $DtChangedAfter"
+    Write-Debug "New-Backup: File Count = $($Files.Length)"
+
+    if ([ArchiveMode]::Partial -ne $ArchiveMode) {
+        if ([datetime]::MinValue -ne $DtChangedAfter) {
+            $CountChangedSinceLastFull = $($Files | Where-Object {
+                    $_.PSIsContainer -or
+                    $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter)
+                } | Measure-Object Length).Count
+
+            if (0 -ge $CountChangedSinceLastFull) {
+                Write-Host "New-Backup: Nothing to do. No files changed since last full backup." -ForegroundColor Yellow
+                return
+            }
+        }
+    }
+
+    Write-Verbose "New-Backup: Archiveing $($Files.Length) files..."
+    New-Archive $SourceFolder $DestinationFolder $ArchiveName $Files
 }
 
-function Get-FilesForFullBackup {
+function Get-FilesForBackup {
     param (
         # Folder containing fiels to be backed up.
         [parameter(Mandatory)]
         [ValidateScript( { Test-Path $_ } )]
         [ValidateNotNullOrEmpty()]
         [string] $SourceFolder,
-
-        # Date/Time after which modified files are to be archived.
-        [parameter(Mandatory)]
-        [ValidateNotNull()]
-        [datetime] $DtChangedAfter,
 
         [string[]] $IgnoreFolders,
         [string[]] $IgnoreFileTypes,
@@ -208,7 +219,8 @@ function Get-FilesForFullBackup {
         Get-ChildItem $SourceFolder -File -Exclude $ignore -Recurse | `
         Where-Object { 
         $(
-            $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter) -or
+            # $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter) -or
+            !$_.PSIsContainer -or
             $($_.PSIsContainer -and $_.Name -inotin $IgnoreFolders)
         ) -and
         $(
