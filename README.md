@@ -113,4 +113,5 @@ Backup-FolderContents `
     -Verbose -Debug
 ```
 
-
+## License
+LICENSE
