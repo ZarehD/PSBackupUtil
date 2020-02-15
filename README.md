@@ -1,6 +1,6 @@
 # PSBackupUtil
 
-Archives the files in the specified folder (excluding any subfolders, files, and/or file types you specify).
+Archives files and folders in a specified folder (excluding any subfolders, files, and/or file types you specify).
 
 Each time the function is executed, it determines whether a full or partial backup should be performed based on the date/time and type of the last backup. 
 - Full backups are created initially if no full backup exists, then every N days.
