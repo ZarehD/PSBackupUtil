@@ -3,13 +3,13 @@
 # Copyright © 2019-2020 Zareh DerGevorkian
 #------------------------------------------------------------------------------
 # Creates a Zip file containing the contents of the specified folder, 
-# excluding any specified subfoldrs, files, and file types.
+# excluding any specified subfolders, files, and file types.
 #
-# Each time the script executes, it determines whether a full or partial backup 
-# should be performed. Full backups are created initially, then every N days 
-# (configured using the $FullBackupInterval parameter, default: 7), whereas 
-# partial backups are created in the interim to archive files changed since 
-# the last Full or Partial backup.
+# Each time the script executes, it determines whether a full or partial 
+# backup should be performed based on the date/time and type of the last 
+# backup. Full backups are created initially, then every N days. Partial 
+# backups are created in the interim to archive only files that have 
+# changed since the last full or partial backup.
 #
 # Zip file names are formated as follows:
 #  <base-name>[-<archive-mode-marker>]-<yyyy>-<MM>-<dd>-<HH>-<mm>.<extension>
