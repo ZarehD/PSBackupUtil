@@ -11,7 +11,7 @@ Each time the module is executed (Backup-FolderContents), it determines whether 
 
 #### Partial Backups
 - Created in the interim time between full backups
-- Only archive files changed since the last full or partial backup
+- Archives only files changed since the last full or partial backup
 
 
 ## Install
