@@ -1,12 +1,18 @@
 # PSBackupUtil
 
-Archives files and folders in a specified folder (excluding any subfolders, files, and/or file types you specify).
+Archives files and folders in a specified folder (excluding any subfolders, files, and/or file types you specify), creating Full backups every N days, and Partial backups in between.
 
-Each time the function is executed, it determines whether a full or partial backup should be performed based on the date/time and type of the last backup. 
-- Full backups are created initially if no full backup exists, then every N days.
-- Partial backups are created in the interim to archive any files that have changed since the last full or partial backup.
+Each time the module is executed (Backup-FolderContents), it determines whether a Full or Partial backup should be performed based on the date/time and type (full/partial) of the last backup. 
 
-Full backups archive all files regardless of their last change date, whereas Partial backups only archive changed files.
+#### Full Backups
+- Created initially when no previous full backup exists, then every N days (see $FullBackupInterval)
+- Created only if there is at least one changed file since the last full backup
+- Archives ALL eligible (not excluded) files and folders, regardless of their last change date/time
+
+#### Partial Backups
+- Created in the interim time between full backups
+- Only archive files changed since the last full or partial backup
+
 
 ## Install
 There are no special dependencies other than PowerShell.
@@ -19,6 +25,7 @@ There are no special dependencies other than PowerShell.
 
 Optionally, create a Windows Scheduler task to run your backup script daily, after you login each day, for instance.
 
+
 ## Archive Name
 Archive files are simply Zip file. The zip file names are formated as follows:
 
@@ -28,6 +35,7 @@ Archive files are simply Zip file. The zip file names are formated as follows:
 - `y, M, d, H, m ::= Component parts of the current date/time (in 24-hour format)`
 - `Archive-Mode-Marker ::= 'Full' | 'Part' | <blank>`
 - `Extension ::= User sepcified (default: 'zip')`
+
 
 ## Parameters
 Parameter                |Required |Data Type    |Default |Description
