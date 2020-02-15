@@ -114,4 +114,4 @@ Backup-FolderContents `
 ```
 
 ## License
-LICENSE
+[MIT](https://zarehd.mit-license.org/) [License](https://github.com/ZarehD/PSBackupUtil/blob/master/LICENSE)
