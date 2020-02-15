@@ -32,8 +32,8 @@ Archive files are simply Zip file. The zip file names are formated as follows:
 `<base-name>[-<archive-mode-marker>]-<yyyy>-<MM>-<dd>-<HH>-<mm>.<extension>`
 
 - `Base-Name ::= User specified, or if unspecified, name of source folder to be archived`
-- `y, M, d, H, m ::= Component parts of the current date/time (in 24-hour format)`
 - `Archive-Mode-Marker ::= 'Full' | 'Part' | <blank>`
+- `y, M, d, H, m ::= Component parts of the current date/time (in 24-hour format)`
 - `Extension ::= User sepcified (default: 'zip')`
 
 
