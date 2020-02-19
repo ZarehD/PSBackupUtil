@@ -18,7 +18,7 @@ Each time the module is executed (Backup-FolderContents), it determines whether 
 There are no special dependencies other than PowerShell.
 
 1. Clone the repo to your local system
-2. Modify the PowerShell profile script, Microsoft.PowerShell_profile.ps1 (located in C:\Users\<user>\Documents\PowerShell)  
+2. Modify the PowerShell profile script, Microsoft.PowerShell_profile.ps1 (located in `C:\Users\<user>\Documents\PowerShell`)  
    Create the file if it doesn't exist, and add the following line:  
    `Import-Module C:\path\to\BackupUtil\BackupUtil.psd1 -Force`
 3. Create a script that uses the module to backup folders (see Samples section below).
