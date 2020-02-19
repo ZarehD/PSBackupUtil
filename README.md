@@ -18,7 +18,7 @@ Each time the module is executed (Backup-FolderContents), it determines whether 
 There are no special dependencies other than PowerShell.
 
 1. Clone the repo to your local system
-2. Modify the PowerShell profile script, Microsoft.PowerShell_profile.ps1 (located in `C:\Users\<user>\Documents\PowerShell`)  
+2. Modify the PowerShell profile script, Microsoft.PowerShell_profile.ps1 (in `C:\Users\<user>\Documents\PowerShell`)  
    Create the file if it doesn't exist, and add the following line:  
    `Import-Module C:\path\to\BackupUtil\BackupUtil.psd1 -Force`
 3. Create a script that uses the module to backup folders (see Samples section below).
@@ -27,7 +27,7 @@ Optionally, create a Windows Scheduler task to run your backup script daily, aft
 
 
 ## Archive Name
-Archive files are simply Zip file. The zip file names are formated as follows:
+Archive files are simply Zip files, named using the following convention:
 
 `<base-name>[-<archive-mode-marker>]-<yyyy>-<MM>-<dd>-<HH>-<mm>.<extension>`
 
