@@ -81,11 +81,13 @@ function Backup-FolderContents {
         $dst = $DestinationFolder
         $base = $BaseName
 
+        Update-NameFormatOfExistingFiles $dst $Extension
+
         if ([string]::IsNullOrWhiteSpace($base)) {
             $base = Split-Path $src -Leaf
-        }    
+        }        
 
-        Update-NameFormatOfExistingFiles $dst $Extension
+        $base = $base -replace "-", "_"
 
         $Mode = Get-NextBackupMode $base $dst $FullBackupInterval $Extension
 
