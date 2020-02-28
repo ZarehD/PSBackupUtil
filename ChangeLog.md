@@ -5,7 +5,7 @@
 
 #### Version 1.2.0 - Feb 27, 2020
 - Change format used for naming archive files
-  - New format is: <base-name>-<date>-<mode>.<extension>
+  - New format is: `<base-name>-<date>-<mode>.<extension>`
   - Makes it so all archive files, regardless of their mode marker, are naturally sorted in chronological order
 - Date value used in naming archive files now includes the seconds value
 
