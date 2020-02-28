@@ -12,10 +12,10 @@
 # changed since the last full or partial backup.
 #
 # Zip file names are formated as follows:
-#  <base-name>[-<archive-mode-marker>]-<yyyy>-<MM>-<dd>-<HH>-<mm>.<extension>
+#  <base-name>-<yyyy>-<MM>-<dd>-<HH>-<mm>-<ss>[-<archive-mode-marker>].<extension>
 #  Where:
 #    <base-name> => User specified, or name of folder to be archived
-#    y, M, d, H, m => components of current date/time in 24-hour format
+#    y, M, d, H, m, s => components of current date/time in 24-hour format
 #    <archive-mode-Marker> => Full | Part | <blank>
 #    <extension> => User sepcified (default: 'zip')
 #------------------------------------------------------------------------------
@@ -84,6 +84,8 @@ function Backup-FolderContents {
         if ([string]::IsNullOrWhiteSpace($base)) {
             $base = Split-Path $src -Leaf
         }    
+
+        Update-NameFormatOfExistingFiles $dst $Extension
 
         $Mode = Get-NextBackupMode $base $dst $FullBackupInterval $Extension
 
@@ -313,7 +315,7 @@ function New-ArchiveName {
     $Marker = Get-ArchiveModeMarker $ArchiveType
     if (-not [string]::IsNullOrWhiteSpace($Marker)) { $Marker = "-$Marker" }
 
-    return "$($BaseName)$($Marker)-$($DtNow.ToString('yyyy-MM-dd-HH-mm')).$($Extension)"
+    return "$($BaseName)-$($DtNow.ToString('yyyy-MM-dd-HH-mm-ss'))$($Marker).$($Extension)"
 }
 
 function Get-NextBackupMode {
@@ -417,13 +419,13 @@ function Get-DateFromArchiveName {
 
     $Name = [Path]::GetFileNameWithoutExtension($ArchiveName)
 
-    $DtParts = $Name.Split("-") | Select-Object -Last 5
+    $DtParts = $Name.Split("-") | Select-Object -Skip 1 -First 6
     $DtString = $DtParts | Select-Object -First 3 | Join-String -Separator "-"
     $DtString += " " + $($DtParts | Select-Object -Last 2 | Join-String -Separator ":")
 
     Write-Debug "Get-DateFromArchiveName: DtString = $DtString"
 
-    return [datetime]::ParseExact($DtString, "yyyy-MM-dd HH:mm", $null)
+    return [datetime]::ParseExact($DtString, "yyyy-MM-dd HH:mm:ss", $null)
 }
 
 function Get-ArchiveModeMarker {
@@ -450,6 +452,50 @@ enum ArchiveMode {
     Full
     Partial
 }
+
+
+function Update-NameFormatOfExistingFiles {
+    [CmdletBinding()]
+    param (
+        # Folder where archive files are located
+        [parameter(Mandatory, HelpMessage = "Folder containing archive files with old naming style.")]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript( { Test-Path $_ } )]
+        [string] $ArchiveFolder,
+
+        # Extension for backup file name (default: 'zip').
+        [parameter(HelpMessage = "Extension for backup file name (default: 'zip').")]
+        [string]
+        $Extension = "zip"
+    )
+
+    $MarkerFull = Get-ArchiveModeMarker ([ArchiveMode]::Full)
+    $MarkerPart = Get-ArchiveModeMarker ([ArchiveMode]::Partial)
+    $FileSpec = Join-Path $ArchiveFolder "*.$($Extension)"
+    $Files = Get-ChildItem $FileSpec -File -Recurse -Force
+
+    $Files | ForEach-Object {
+        $PathName = $_.FullName
+        $FileName = [Path]::GetFileNameWithoutExtension($PathName)
+        $FileExt = [Path]::GetExtension($PathName)
+
+        $NameParts = $FileName.Split("-")
+        $BaseName = $NameParts | Select-Object -First 1
+        $Mode = $NameParts | Select-Object -Skip 1 -First 1
+
+        $IsMode = $Mode -iin ($MarkerFull, $MarkerPart) -and -not "$Mode".StartsWith("20")
+
+        if ($IsMode) {
+            $DtParts = $NameParts | Select-Object -Last 5
+            $DtString = $DtParts | Join-String -Separator "-"
+            
+            $NewName = "$BaseName-$DtString-00-$Mode$FileExt"
+            
+            Rename-Item -Path $PathName $NewName
+        }
+    }
+}
+
 
 
 Export-ModuleMember "Backup-FolderContents"
