@@ -29,11 +29,11 @@ Optionally, create a Windows Scheduler task to run your backup script daily, aft
 ## Archive Name
 Archive files are simply Zip files, named using the following convention:
 
-`<base-name>[-<archive-mode-marker>]-<yyyy>-<MM>-<dd>-<HH>-<mm>.<extension>`
+`<base-name>-<yyyy>-<MM>-<dd>-<HH>-<mm>-<ss>[-<archive-mode-marker>].<extension>`
 
-- `Base-Name ::= User specified, or if unspecified, name of source folder to be archived`
+- `Base-Name ::= User specified, or if unspecified, name of source folder to be archived. NOTE: Any '-' char in the base name will be replaced with '_'`
+- `y, M, d, H, m, s ::= Component parts of the current date/time (in 24-hour format)`
 - `Archive-Mode-Marker ::= 'Full' | 'Part' | <blank>`
-- `y, M, d, H, m ::= Component parts of the current date/time (in 24-hour format)`
 - `Extension ::= User sepcified (default: 'zip')`
 
 
