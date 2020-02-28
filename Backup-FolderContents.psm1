@@ -393,7 +393,7 @@ function Get-DateMostRecentArchive {
         $Marker = Get-ArchiveModeMarker $ArchiveType
         if (-not [string]::IsNullOrWhiteSpace($Marker)) { $Marker = "-$Marker" }
 
-        $Path = Join-Path -Path $BackupsFolder -ChildPath "$($BaseName)$($Marker)*.$($Extension)"
+        $Path = Join-Path -Path $BackupsFolder -ChildPath "$($BaseName)*$($Marker).$($Extension)"
         $Path = [Path]::GetFullPath($Path)
 
         if (0 -ge (Get-ChildItem $Path | Measure-Object).Count) {
@@ -423,7 +423,7 @@ function Get-DateFromArchiveName {
 
     $DtParts = $Name.Split("-") | Select-Object -Skip 1 -First 6
     $DtString = $DtParts | Select-Object -First 3 | Join-String -Separator "-"
-    $DtString += " " + $($DtParts | Select-Object -Last 2 | Join-String -Separator ":")
+    $DtString += " " + $($DtParts | Select-Object -Last 3 | Join-String -Separator ":")
 
     Write-Debug "Get-DateFromArchiveName: DtString = $DtString"
 

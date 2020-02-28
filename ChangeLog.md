@@ -1,3 +1,6 @@
+#### Version 1.2.2 - Feb 27, 2020
+- BUGFIX: Fix search for most recent archive file to reflect new archive file name format.
+- BUGFIX: Fix how date value is extracted from archive files named using the new format.
 
 #### Version 1.2.1 - Feb 27, 2020
 - Hyphen chars are replaced with underscores in archive Base Name, whether specified as a parameter, or derrived from the source pathname.
