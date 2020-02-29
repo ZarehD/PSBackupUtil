@@ -1,6 +1,6 @@
 @{
     RootModule        = '.\Backup-FolderContents.psm1'
-    ModuleVersion     = "1.2.2"
+    ModuleVersion     = "1.2.3"
     GUID              = "5488db86-a6a9-4754-9ac5-af0132c44355"
     Author            = "Zareh DerGevorkian"
     Copyright         = "(c) 2019-2020 Zareh DerGevorkian. All rights reserved"

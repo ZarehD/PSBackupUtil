@@ -103,7 +103,7 @@ function Backup-FolderContents {
         Write-Host "Operation completed in $($sw.Elapsed.TotalSeconds) seconds for $base ($SourceFolder)" #-ForegroundColor Green
     }
     catch {
-        throw
+        Write-Error $_
     }
 }
 
@@ -461,8 +461,8 @@ function Update-NameFormatOfExistingFiles {
     param (
         # Folder where archive files are located
         [parameter(Mandatory, HelpMessage = "Folder containing archive files with old naming style.")]
-        [ValidateNotNullOrEmpty()]
-        [ValidateScript( { Test-Path $_ } )]
+        # [ValidateNotNullOrEmpty()]
+        # [ValidateScript( { Test-Path $_ } )]
         [string] $ArchiveFolder,
 
         # Extension for backup file name (default: 'zip').
@@ -470,31 +470,40 @@ function Update-NameFormatOfExistingFiles {
         [string]
         $Extension = "zip"
     )
-
-    $MarkerFull = Get-ArchiveModeMarker ([ArchiveMode]::Full)
-    $MarkerPart = Get-ArchiveModeMarker ([ArchiveMode]::Partial)
-    $FileSpec = Join-Path $ArchiveFolder "*.$($Extension)"
-    $Files = Get-ChildItem $FileSpec -File -Recurse -Force
-
-    $Files | ForEach-Object {
-        $PathName = $_.FullName
-        $FileName = [Path]::GetFileNameWithoutExtension($PathName)
-        $FileExt = [Path]::GetExtension($PathName)
-
-        $NameParts = $FileName.Split("-")
-        $BaseName = $NameParts | Select-Object -First 1
-        $Mode = $NameParts | Select-Object -Skip 1 -First 1
-
-        $IsMode = $Mode -iin ($MarkerFull, $MarkerPart) -and -not "$Mode".StartsWith("20")
-
-        if ($IsMode) {
-            $DtParts = $NameParts | Select-Object -Last 5
-            $DtString = $DtParts | Join-String -Separator "-"
-            
-            $NewName = "$BaseName-$DtString-00-$Mode$FileExt"
-            
-            Rename-Item -Path $PathName $NewName
+    try {
+        if ([string]::IsNullOrWhiteSpace($ArchiveFolder) -or
+            ($true -ne (Test-Path $ArchiveFolder))) {
+            return
         }
+    
+        $MarkerFull = Get-ArchiveModeMarker ([ArchiveMode]::Full)
+        $MarkerPart = Get-ArchiveModeMarker ([ArchiveMode]::Partial)
+        $FileSpec = Join-Path $ArchiveFolder "*.$($Extension)"
+        $Files = Get-ChildItem $FileSpec -File -Recurse -Force
+
+        $Files | ForEach-Object {
+            $PathName = $_.FullName
+            $FileName = [Path]::GetFileNameWithoutExtension($PathName)
+            $FileExt = [Path]::GetExtension($PathName)
+
+            $NameParts = $FileName.Split("-")
+            $BaseName = $NameParts | Select-Object -First 1
+            $Mode = $NameParts | Select-Object -Skip 1 -First 1
+
+            $IsMode = $Mode -iin ($MarkerFull, $MarkerPart) -and -not "$Mode".StartsWith("20")
+
+            if ($IsMode) {
+                $DtParts = $NameParts | Select-Object -Last 5
+                $DtString = $DtParts | Join-String -Separator "-"
+            
+                $NewName = "$BaseName-$DtString-00-$Mode$FileExt"
+            
+                Rename-Item -Path $PathName $NewName
+            }
+        }
+    }
+    catch {
+        Write-Error $_
     }
 }
 
