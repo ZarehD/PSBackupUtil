@@ -152,7 +152,7 @@ function New-Backup {
         -IgnoreFileTypes $IgnoreFileTypes `
         -IgnoreFiles $IgnoreFiles
 
-    $CountFiles = ($Files | Measure-Object).Count
+    $CountFiles = ($Files | Measure-Object -Property Length).Count
     
     Write-Debug "New-Backup: Count All Files = $CountFiles"
     
@@ -181,7 +181,7 @@ function New-Backup {
             $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter)
         }
 
-        $CountFiles = ($Files | Measure-Object).Count
+        $CountFiles = ($Files | Measure-Object -Property Length).Count
 
         Write-Debug "New-Backup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter, Count Changed Files = $CountFiles"
 
@@ -196,7 +196,7 @@ function New-Backup {
             $CountChangedSinceLastFull = $($Files | Where-Object {
                     $_.PSIsContainer -or
                     $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter)
-                } | Measure-Object Length).Count
+                } | Measure-Object -Property Length).Count
 
             Write-Debug "New-Backup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter"
 
@@ -403,7 +403,7 @@ function Get-DateMostRecentArchive {
         $Path = Join-Path -Path $BackupsFolder -ChildPath "$($BaseName)*$($Marker).$($Extension)"
         $Path = [Path]::GetFullPath($Path)
 
-        if (0 -ge (Get-ChildItem $Path | Measure-Object).Count) {
+        if (0 -ge (Get-ChildItem $Path | Measure-Object -Property Length).Count) {
             return $null
         }
 

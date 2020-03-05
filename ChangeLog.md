@@ -1,3 +1,6 @@
+#### Version 1.2.5 - Mar 4, 2020
+- Use formal syntax with Measure-Object cmdlet
+
 #### Version 1.2.4 - Mar 4, 2020
 - BUGFIX: For partial backups, when setting $DtChangedAfter (used to determine which files changed since last archive), $DtLastPartial should be used only if it's greater than $DtLastFull
 - Change logging level to Verbose for certain messges
