@@ -1,3 +1,6 @@
+#### Version 1.2.6 - Mar 4, 2020
+- Use Count property instead of Measure-Object cmdlet
+
 #### Version 1.2.5 - Mar 4, 2020
 - Use formal syntax with Measure-Object cmdlet
 
