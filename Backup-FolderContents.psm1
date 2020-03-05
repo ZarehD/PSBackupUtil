@@ -143,7 +143,7 @@ function New-Backup {
 
     $ArchiveName = New-ArchiveName $Basename $ArchiveMode $Extension
     $ArchiveName = join-path -Path $DestinationFolder -ChildPath $ArchiveName
-    Write-Debug "New-Backup: ArchiveName = $ArchiveName"
+    Write-Verbose "New-Backup: ArchiveName = $ArchiveName"
 
 
     $Files = Get-FilesForBackup `
@@ -152,23 +152,27 @@ function New-Backup {
         -IgnoreFileTypes $IgnoreFileTypes `
         -IgnoreFiles $IgnoreFiles
 
-    if (($null -eq $Files) -or (0 -ge $Files.Length)) {
+    $CountFiles = ($Files | Measure-Object).Count
+    
+    Write-Debug "New-Backup: Count All Files = $CountFiles"
+    
+    # $Files | Select-Object -Property FullName
+
+    if (($null -eq $Files) -or (0 -ge $CountFiles)) {
         Write-Warning "New-Backup: Source folder contains no files that can be archived."
         return
     }
 
-    # $Files | Select-Object -Property FullName
-
 
     $DtLastFull = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Full) $Extension
     $DtChangedAfter = $DtLastFull
-    if ($null -eq $DtChangedAfter) { 
+    if ($null -eq $DtLastFull) { 
         $DtChangedAfter = [datetime]::MinValue
     }
 
     if ([ArchiveMode]::Partial -eq $ArchiveMode) {
         $DtLastPartial = Get-DateMostRecentArchive $DestinationFolder $Basename ([ArchiveMode]::Partial) $Extension
-        if ($null -ne $DtLastPartial) {
+        if (($null -ne $DtLastPartial) -and ($DtLastPartial -gt $DtLastFull)) {
             $DtChangedAfter = $DtLastPartial 
         }
 
@@ -177,14 +181,15 @@ function New-Backup {
             $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter)
         }
 
-        if (($null -eq $Files) -or (0 -ge $Files.Length)) {
-            Write-Host "New-Backup: Nothing to do. No files changed since last backup." -ForegroundColor Yellow
+        $CountFiles = ($Files | Measure-Object).Count
+
+        Write-Debug "New-Backup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter, Count Changed Files = $CountFiles"
+
+        if (($null -eq $Files) -or (0 -ge $CountFiles)) {
+            Write-Host "Nothing to do. No changed files since last backup." -ForegroundColor Yellow
             return
         }
     }
-
-    Write-Debug "New-Backup: DtChangedAfter = $DtChangedAfter"
-    Write-Debug "New-Backup: File Count = $($Files.Length)"
 
     if ([ArchiveMode]::Partial -ne $ArchiveMode) {
         if ([datetime]::MinValue -ne $DtChangedAfter) {
@@ -193,14 +198,16 @@ function New-Backup {
                     $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter)
                 } | Measure-Object Length).Count
 
+            Write-Debug "New-Backup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter"
+
             if (0 -ge $CountChangedSinceLastFull) {
-                Write-Host "New-Backup: Nothing to do. No files changed since last full backup." -ForegroundColor Yellow
+                Write-Host "Nothing to do. No changed files since last full backup." -ForegroundColor Yellow
                 return
             }
         }
     }
 
-    Write-Verbose "New-Backup: Archiveing $($Files.Length) files..."
+    Write-Host "Backing Up $CountFiles files..."
     New-Archive $SourceFolder $DestinationFolder $ArchiveName $Files
 }
 
@@ -401,7 +408,7 @@ function Get-DateMostRecentArchive {
         }
 
         $ArchiveName = Get-ChildItem $Path | Sort-Object -Property FullName | Select-Object -Last 1 | Split-Path -Leaf
-        Write-Debug "Get-DateMostRecentArchive: Last Archive = $ArchiveName"
+        Write-Verbose "Get-DateMostRecentArchive: Mode = $ArchiveType, Archive = $ArchiveName"
 
         return Get-DateFromArchiveName $ArchiveName
     }
@@ -425,7 +432,7 @@ function Get-DateFromArchiveName {
     $DtString = $DtParts | Select-Object -First 3 | Join-String -Separator "-"
     $DtString += " " + $($DtParts | Select-Object -Last 3 | Join-String -Separator ":")
 
-    Write-Debug "Get-DateFromArchiveName: DtString = $DtString"
+    Write-Verbose "Get-DateFromArchiveName: DtString = $DtString"
 
     return [datetime]::ParseExact($DtString, "yyyy-MM-dd HH:mm:ss", $null)
 }

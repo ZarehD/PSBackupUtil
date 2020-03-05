@@ -1,3 +1,8 @@
+#### Version 1.2.4 - Mar 4, 2020
+- BUGFIX: For partial backups, when setting $DtChangedAfter (used to determine which files changed since last archive), $DtLastPartial should be used only if it's greater than $DtLastFull
+- Change logging level to Verbose for certain messges
+- Debug-log file counts and other info in New-Backup function
+
 #### Version 1.2.3 - Feb 29, 2020
 - BUGFIX: Prevent error (just exit) when path passed to Update-NameFormatOfExistingFiles doesn't exist
 - Module entry-point function now prints out caught exceptions instead of rethrowing them
