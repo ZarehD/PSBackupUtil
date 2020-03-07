@@ -2,25 +2,28 @@
 
 ![Platform](https://img.shields.io/badge/Platform-PowerShell%20|%20PowerShellCore-svg?color=blue)
 
+<span align="center">
+   <img src="https://github.com/ZarehD/PSBackupUtil/blob/master/logo.png" width="256" />
+</span>
 
 # PSBackupUtil
 
-Archives files and folders in a specified folder (excluding any subfolders, files, and/or file types you specify), creating Full backups every N days, and Partial backups in between.
+Backup utility for archiving files from a specified folder (excluding any specified subfolders, files, or file types), creating Full backups every N days, and Partial backups in between.
 
-Each time the module is executed (Backup-FolderContents), it determines whether a Full or Partial backup should be performed based on the date/time and type (full/partial) of the last backup. 
+Each time the module is executed (Backup-FolderContents), it determines whether a Full or Partial backup should be performed based on the date/time and type (full/partial) of the last backup.
 
 #### Full Backups
-- Created initially when no previous full backup exists, then every N days (see $FullBackupInterval)
+- Created when no previous full backup exists, otherwise every N days ($FullBackupInterval)
 - Created only if there is at least one changed file since the last full backup
-- Archives ALL eligible (not excluded) files and folders, regardless of their last change date/time
+- Archives ALL eligible (not excluded) files, regardless of their last change date/time
 
 #### Partial Backups
 - Created in the interim time between full backups
-- Archives only files changed since the last full or partial backup
+- Archives only files changed since the last (full or partial) backup
 
 
 ## Install
-There are no special dependencies other than PowerShell.
+There are no external dependencies other than PowerShell.
 
 1. Clone the repo to your local system
 2. Modify the PowerShell profile script, Microsoft.PowerShell_profile.ps1 (in `C:\Users\<user>\Documents\PowerShell`)  
