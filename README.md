@@ -1,4 +1,7 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://zarehd.mit-license.org/)
+[![GitHub](https://img.shields.io/github/license/zarehd/psbackuputil?color=darkgreen&label=License)](https://zarehd.mit-license.org/)
+
+![Platform](https://img.shields.io/badge/Platform-PowerShell%20|%20PowerShellCore-svg?color=blue)
+
 
 # PSBackupUtil
 
