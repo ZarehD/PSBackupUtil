@@ -1,3 +1,12 @@
+#### Version 1.2.7 - Mar 7, 2020
+- Add license and platform badges
+- Add logo icon
+- Add NOTICE file
+- Update copyright/Trademark notices
+- Update links in PrivateData section in module manifest
+- Rename functions to address PS script analyzer warnings
+- Save script file with Utf8bom encoding
+
 #### Version 1.2.6 - Mar 4, 2020
 - Use Count property instead of Measure-Object cmdlet
 
