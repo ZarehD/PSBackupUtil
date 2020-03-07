@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://zarehd.mit-license.org/)
+
 # PSBackupUtil
 
 Archives files and folders in a specified folder (excluding any subfolders, files, and/or file types you specify), creating Full backups every N days, and Partial backups in between.
