@@ -1,6 +1,6 @@
-#------------------------------------------------------------------------------
-# Backup-FolderContents
-# Copyright © 2019-2020 Zareh DerGevorkian
+﻿#------------------------------------------------------------------------------
+# PSBackupUtil™
+# Copyright (c) 2019-2020 Zareh DerGevorkian
 #------------------------------------------------------------------------------
 # Creates a Zip file containing the contents of the specified folder, 
 # excluding any specified subfolders, files, and file types.
@@ -81,7 +81,7 @@ function Backup-FolderContents {
         $dst = $DestinationFolder
         $base = $BaseName
 
-        Update-NameFormatOfExistingFiles $dst $Extension
+        Invoke-UpdateNameFormatOfExistingFiles $dst $Extension
 
         if ([string]::IsNullOrWhiteSpace($base)) {
             $base = Split-Path $src -Leaf
@@ -92,15 +92,15 @@ function Backup-FolderContents {
         $Mode = Get-NextBackupMode $base $dst $FullBackupInterval $Extension
 
         $type = if ($Mode -eq ([ArchiveMode]::Unknown)) { $null } else { "$Mode " }
-        Write-Host "Performing $($type)Backup for $base" #-ForegroundColor Green
+        Write-Information "Performing $($type)Backup for $base" #-ForegroundColor Green
 
-        New-Backup `
+        Invoke-RunBackup `
             $src $dst $Mode $base $Extension `
             -IgnoreFolders $IgnoreFolders `
             -IgnoreFileTypes $IgnoreFileTypes `
             -IgnoreFiles $IgnoreFiles
 
-        Write-Host "Operation completed in $($sw.Elapsed.TotalSeconds) seconds for $base ($SourceFolder)" #-ForegroundColor Green
+        Write-Information "Operation completed in $($sw.Elapsed.TotalSeconds) seconds for $base ($SourceFolder)" #-ForegroundColor Green
     }
     catch {
         Write-Error $_
@@ -108,7 +108,7 @@ function Backup-FolderContents {
 }
 
 
-function New-Backup {
+function Invoke-RunBackup {
     param (
         # Folder containing fiels to be backed up.
         [parameter(Mandatory)]
@@ -141,9 +141,9 @@ function New-Backup {
         [string[]] $IgnoreFiles
     )
 
-    $ArchiveName = New-ArchiveName $Basename $ArchiveMode $Extension
+    $ArchiveName = Get-NewArchiveName $Basename $ArchiveMode $Extension
     $ArchiveName = join-path -Path $DestinationFolder -ChildPath $ArchiveName
-    Write-Verbose "New-Backup: ArchiveName = $ArchiveName"
+    Write-Verbose "Invoke-RunBackup: ArchiveName = $ArchiveName"
 
 
     $Files = Get-FilesForBackup `
@@ -154,12 +154,12 @@ function New-Backup {
 
     $CountFiles = ($Files).Count
     
-    Write-Debug "New-Backup: Count All Files = $CountFiles"
+    Write-Debug "Invoke-RunBackup: Count All Files = $CountFiles"
     
     # $Files | Select-Object -Property FullName
 
     if (($null -eq $Files) -or (0 -ge $CountFiles)) {
-        Write-Warning "New-Backup: Source folder contains no files that can be archived."
+        Write-Warning "Invoke-RunBackup: Source folder contains no files that can be archived."
         return
     }
 
@@ -183,10 +183,10 @@ function New-Backup {
 
         $CountFiles = ($Files).Count
 
-        Write-Debug "New-Backup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter, Count Changed Files = $CountFiles"
+        Write-Debug "Invoke-RunBackup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter, Count Changed Files = $CountFiles"
 
         if (($null -eq $Files) -or (0 -ge $CountFiles)) {
-            Write-Host "Nothing to do. No changed files since last backup." -ForegroundColor Yellow
+            Write-Information "Nothing to do. No changed files since last backup." -ForegroundColor Yellow
             return
         }
     }
@@ -197,19 +197,19 @@ function New-Backup {
                     $_.PSIsContainer -or
                     $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter)
                 }).Count
-                # } | Measure-Object -Property Length).Count
+            # } | Measure-Object -Property Length).Count
 
-            Write-Debug "New-Backup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter"
+            Write-Debug "Invoke-RunBackup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter"
 
             if (0 -ge $CountChangedSinceLastFull) {
-                Write-Host "Nothing to do. No changed files since last full backup." -ForegroundColor Yellow
+                Write-Information "Nothing to do. No changed files since last full backup." -ForegroundColor Yellow
                 return
             }
         }
     }
 
-    Write-Host "Backing Up $CountFiles files..."
-    New-Archive $SourceFolder $DestinationFolder $ArchiveName $Files
+    Write-Information "Backing Up $CountFiles files..."
+    Invoke-CreateArchive $SourceFolder $DestinationFolder $ArchiveName $Files
 }
 
 function Get-FilesForBackup {
@@ -249,7 +249,7 @@ function Get-FilesForBackup {
     return $Files
 }
 
-function New-Archive {
+function Invoke-CreateArchive {
     param (
         [parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -293,7 +293,7 @@ function New-Archive {
             $tempPath = $TempFolder
         }
         Copy-Item $_ -Destination $tempPath -ErrorAction Stop 
-        $haveFiles = $true
+        if ($haveFiles -ne $true) { $haveFiles = $true }
     }
 
     if ($haveFiles) {
@@ -303,7 +303,7 @@ function New-Archive {
 }
 
 
-function New-ArchiveName {
+function Get-NewArchiveName {
     param (
         # Base name for archive file.
         [parameter(Mandatory)]
@@ -465,7 +465,7 @@ enum ArchiveMode {
 }
 
 
-function Update-NameFormatOfExistingFiles {
+function Invoke-UpdateNameFormatOfExistingFiles {
     [CmdletBinding()]
     param (
         # Folder where archive files are located
