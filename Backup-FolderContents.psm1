@@ -92,7 +92,7 @@ function Backup-FolderContents {
         $Mode = Get-NextBackupMode $base $dst $FullBackupInterval $Extension
 
         $type = if ($Mode -eq ([ArchiveMode]::Unknown)) { $null } else { "$Mode " }
-        Write-Information "Performing $($type)Backup for $base" #-ForegroundColor Green
+        Write-Information "Performing $($type)Backup for $base" -InformationAction Continue
 
         Invoke-RunBackup `
             $src $dst $Mode $base $Extension `
@@ -100,7 +100,9 @@ function Backup-FolderContents {
             -IgnoreFileTypes $IgnoreFileTypes `
             -IgnoreFiles $IgnoreFiles
 
-        Write-Information "Operation completed in $($sw.Elapsed.TotalSeconds) seconds for $base ($SourceFolder)" #-ForegroundColor Green
+        Write-Information `
+            "Operation completed in $($sw.Elapsed.TotalSeconds) seconds for $base ($SourceFolder)" `
+            -InformationAction Continue
     }
     catch {
         Write-Error $_
@@ -186,7 +188,7 @@ function Invoke-RunBackup {
         Write-Debug "Invoke-RunBackup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter, Count Changed Files = $CountFiles"
 
         if (($null -eq $Files) -or (0 -ge $CountFiles)) {
-            Write-Information "Nothing to do. No changed files since last backup." -ForegroundColor Yellow
+            Write-Information "Nothing to do. No changed files since last backup." -InformationAction Continue
             return
         }
     }
@@ -202,13 +204,13 @@ function Invoke-RunBackup {
             Write-Debug "Invoke-RunBackup: ArchiveMode = $ArchiveMode, DtChangedAfter = $DtChangedAfter"
 
             if (0 -ge $CountChangedSinceLastFull) {
-                Write-Information "Nothing to do. No changed files since last full backup." -ForegroundColor Yellow
+                Write-Information "Nothing to do. No changed files since last full backup." -InformationAction Continue
                 return
             }
         }
     }
 
-    Write-Information "Backing Up $CountFiles files..."
+    Write-Information "Backing Up $CountFiles file(s)..." -InformationAction Continue
     Invoke-CreateArchive $SourceFolder $DestinationFolder $ArchiveName $Files
 }
 
