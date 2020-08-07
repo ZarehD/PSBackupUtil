@@ -65,6 +65,7 @@ $IgnoreFiles             |         |string array |       | Names of specific fil
 
 Here's a sample script that uses the BackupUtil module to backup project files.
 
+#### MyBackupScript.ps1
 ```
 ##Requires -Module BackupUtil
 
