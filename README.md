@@ -8,7 +8,7 @@
 
 # PSBackupUtil
 
-Backup utility for archiving files from a specified folder (excluding any specified subfolders, files, or file types), creating Full backups every N days, and Partial backups in between.
+Utility for archiving files from a specified folder (excluding any specified subfolders, files, or file types), creating Full backups every N days, and Partial backups in between.
 
 Each time the module is executed (Backup-FolderContents), it determines whether a Full or Partial backup should be performed based on the date/time and type (full/partial) of the last backup.
 
