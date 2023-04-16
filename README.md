@@ -23,19 +23,24 @@ Each time the module is executed (Backup-FolderContents), it determines whether 
 
 
 ## Install
-There are no external dependencies other than PowerShell.
 
-1. Clone the repo to your local system
-2. Modify the PowerShell profile script, Microsoft.PowerShell_profile.ps1 (in `C:\Users\<user>\Documents\PowerShell`)  
-   Create the file if it doesn't exist, and add the following line:  
+> #### PsBackupUril has no external dependencies!
+
+Install directly from the official Powershell Gallery:
+```ps
+PS> Install-Module -Name PsBackupUtil
+```
+
+## Ways to Use the Module
+- To make the module available whenever you open a  PS prompt: modify the PowerShell profile script, `Microsoft.PowerShell_profile.ps1` (in `C:\Users\<user>\Documents\PowerShell`. Create the file if it doesn't exist).<br/>
+   And add the following line in the file:
    `Import-Module C:\path\to\BackupUtil\BackupUtil.psd1 -Force`
-3. Create a script that uses the module to backup folders (see Samples section below).
-
-Optionally, create a Windows Scheduler task to run your backup script daily, after you login each day, for instance.
+- To archive a preset group of folders, create a script that uses the module to backup folders (see Samples section below).
+- To run the archive script on a schedule, create a scheduled task (e.g. Windows Scheduler, cron job) to run your backup script (e.g. daily, after you login each day).
 
 
 ## Archive Name
-Archive files are simply Zip files, named using the following convention:
+The archive files are compressed Zip files, named using the following convention:
 
 `<base-name>-<yyyy>-<MM>-<dd>-<HH>-<mm>-<ss>[-<archive-mode-marker>].<extension>`
 
@@ -66,7 +71,7 @@ $IgnoreFiles             |         |string array |       | Names of specific fil
 Here's a sample script that uses the BackupUtil module to backup project files.
 
 #### MyBackupScript.ps1
-```
+```ps
 ##Requires -Module BackupUtil
 
 
@@ -78,7 +83,7 @@ $dstRoot = Join-Path "D:\Archives\Projects" $project
 #----------------------------------------------------------------------------------------------------------
 # backup project source code...
 $FoldersToIgnore = @(
-    "obj", "bin", 
+    "obj", "bin", ".vs", ".git",
     "packages", "node_modules", "wwwroot"
 )    
 $FileTypesToIgnore = @("*.zip", "*.user", "*.msi")
