@@ -66,7 +66,7 @@ $IgnoreFileTypes         |         |string array |       | File types (ex: '*.zi
 $IgnoreFiles             |         |string array |       | Names of specific files (name & extension, no path) to omit from the backup
 
 
-## Sample
+## Samples
 
 Here's a sample script that uses the BackupUtil module to backup project files.
 
