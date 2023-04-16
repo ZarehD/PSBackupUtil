@@ -1,6 +1,6 @@
-[![GitHub](https://img.shields.io/github/license/zarehd/psbackuputil?color=darkgreen&label=License)](https://zarehd.mit-license.org/)
-
 ![Platform](https://img.shields.io/badge/Platform-PowerShell%20|%20PowerShellCore-svg?color=blue)
+&nbsp;
+[![GitHub](https://img.shields.io/github/license/zarehd/psbackuputil?color=darkgreen&label=License)](https://zarehd.mit-license.org/)
 
 <span align="center">
    <img src="https://github.com/ZarehD/PSBackupUtil/blob/master/logo.png" width="256" />
@@ -8,7 +8,7 @@
 
 # PSBackupUtil
 
-Backup utility for archiving files from a specified folder (excluding any specified subfolders, files, or file types), creating Full backups every N days, and Partial backups in between.
+Utility for archiving files from a specified folder (excluding any specified subfolders, files, or file types), creating Full backups every N days, and Partial backups in between.
 
 Each time the module is executed (Backup-FolderContents), it determines whether a Full or Partial backup should be performed based on the date/time and type (full/partial) of the last backup.
 
