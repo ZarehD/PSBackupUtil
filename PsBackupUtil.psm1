@@ -1,6 +1,6 @@
 ﻿#------------------------------------------------------------------------------
 # PSBackupUtil™
-# Copyright (c) 2019-2020 Zareh DerGevorkian
+# Copyright (c) 2019-2023 Zareh DerGevorkian
 #------------------------------------------------------------------------------
 # Creates a Zip file containing the contents of the specified folder, 
 # excluding any specified subfolders, files, and file types.

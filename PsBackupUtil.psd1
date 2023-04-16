@@ -1,10 +1,10 @@
 @{
-    RootModule           = '.\Backup-FolderContents.psm1'
-    ModuleVersion        = "1.2.8"
+    RootModule           = '.\PsBackupUtil.psm1'
+    ModuleVersion        = "1.3.0"
     GUID                 = "5488db86-a6a9-4754-9ac5-af0132c44355"
     Author               = "Zareh DerGevorkian"
     Copyright            = "(c) 2019-2023 Zareh DerGevorkian. All rights reserved"
-    Description          = "PSBackupUtil™: Utility for making full & partial disk-to-disk archives"
+    Description          = "PsBackupUtil: Makes full & partial disk-to-disk archives"
 
     PowerShellVersion    = "5.1"
     CompatiblePSEditions = "Desktop", "Core"
@@ -26,7 +26,7 @@
     # )
 
     FileList             = @(
-        ".\Backup-FolderContents.psm1"
+        ".\PsBackupUtil.psm1"
     )
 
     VariablesToExport    = @()
