@@ -21,6 +21,7 @@ Each time the module is executed (Backup-FolderContents), it determines whether 
 - Created in the interim time between full backups
 - Archives only files changed since the last (full or partial) backup
 
+> #### NOTE: The archive operation will fail if files are read-locked (in use).
 
 ## Install
 
