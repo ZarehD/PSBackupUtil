@@ -236,14 +236,13 @@ function Get-FilesForBackup {
             # $(!$_.PSIsContainer -and $_.LastWriteTime -gt $DtChangedAfter) -or
             !$_.PSIsContainer -or
             $($_.PSIsContainer -and $_.Name -inotin $IgnoreFolders)
-        ) -and
-        $(
+        ) -and $(
             foreach ($fig in $IgnoreFolders) { 
-                if ($_ -imatch "\\$fig\\" ) {
+                if (($_ -imatch "\\$fig\\" ) -or ($_ -imatch "/$fig/" )) {
                     return $false
                 }
             }
-            return $true
+            $true # return $true
         ) } | `
         Select-Object | `
         Sort-Object -Property FullName, Name
