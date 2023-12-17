@@ -36,7 +36,7 @@
             ProjectUri   = "https://github.com/ZarehD/PSBackupUtil"
             LicenseUri   = "https://github.com/ZarehD/PSBackupUtil/blob/master/LICENSE"
             IconUri      = "https://github.com/ZarehD/PSBackupUtil/blob/master/logo.png"
-            ReleaseNotes = "https://github.com/ZarehD/PSBackupUtil/blob/master/CHANGELOG.md"
+            ReleaseNotes = "https://github.com/ZarehD/PSBackupUtil/blob/master/ChangeLog.md"
             Tags         = @("PSEdition_Desktop", "PSEdition_Core", "Disk_to_Disk", "Archive", "Backup")
         }
     }
