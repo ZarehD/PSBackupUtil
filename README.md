@@ -21,23 +21,27 @@ Each time the module is executed (Backup-FolderContents), it determines whether 
 - Created in the interim time between full backups
 - Archives only files changed since the last (full or partial) backup
 
-> #### NOTE: The archive operation will fail if files are read-locked (in use).
+> #### NOTE: The archive operation will fail if files are read-locked (i.e. in use).
 
-## Install
+## Installation
 
 > #### PsBackupUril has no external dependencies!
 
-Install directly from the official Powershell Gallery:
+### From Powershell Gallery (recommended)
 ```powershell
 PS> Install-Module -Name PsBackupUtil
 ```
 
-## Ways to Use the Module
-- To make the module available whenever you open a  PS prompt: modify the PowerShell profile script, `Microsoft.PowerShell_profile.ps1` (in `C:\Users\<user>\Documents\PowerShell`. Create the file if it doesn't exist).<br/>
-   And add the following line in the file:
-   `Import-Module C:\path\to\BackupUtil\BackupUtil.psd1 -Force`
-- To archive a preset group of folders, create a script that uses the module to backup folders (see Samples section below).
-- To run the archive script on a schedule, create a scheduled task (e.g. Windows Scheduler, cron job) to run your backup script (e.g. daily, after you login each day).
+To make the module available whenever you open a  PS prompt:
+- Modify the PowerShell profile script, _Microsoft.PowerShell_profile.ps1_ (in `C:\Users\<user>\Documents\PowerShell`. Create the file if it doesn't exist).<br/>
+- Add the following line to the file:
+  ```
+  Import-Module C:\path\to\BackupUtil\BackupUtil.psd1 -Force
+  ```
+
+## Using the Module
+To archive a preset group of folders, create a script that uses the module to backup folders (_see **Samples** section below_).
+To run the archive script on a schedule, create a scheduled task (e.g. Windows Scheduler, cron job, etc.) to run your backup script (e.g. daily or after you login each day).
 
 
 ## Archive Name
@@ -69,10 +73,10 @@ $IgnoreFiles             |         |string array |       | Names of specific fil
 
 ## Samples
 
-Here's a sample script that uses the BackupUtil module to backup project files.
+Here's a sample script that uses the module to backup project files.
 
 #### MyBackupScript.ps1
-```ps
+```powershell
 ##Requires -Module BackupUtil
 
 
@@ -130,3 +134,5 @@ Backup-FolderContents `
 
 ## License
 [MIT](https://zarehd.mit-license.org/) [License](https://github.com/ZarehD/PSBackupUtil/blob/master/LICENSE)
+
+If you like this project, or find it useful, please give it a star. Thank you.
