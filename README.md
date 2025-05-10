@@ -28,7 +28,7 @@ Each time the module is executed (Backup-FolderContents), it determines whether 
 > #### PsBackupUril has no external dependencies!
 
 Install directly from the official Powershell Gallery:
-```ps
+```powershell
 PS> Install-Module -Name PsBackupUtil
 ```
 
